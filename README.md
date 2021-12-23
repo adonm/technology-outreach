@@ -15,6 +15,7 @@ TL;DR - Ensure organisational oversight exists for all technology usage, and pro
 
 ## Guidance
 TODO: target below at owners of various responsibilities. Small orgs will have to be across all areas where larger orgs can divide responsibilities between teams.
+- [Code Management](Documents/CodeManagement.md)
 
 ### [Azure Security Fundamentals - Shared Responsibility](https://docs.microsoft.com/en-us/azure/security/fundamentals/shared-responsibility)
 Define at a high level what your central team has skills in and what can be outsourced (most likely to a public cloud provider).
