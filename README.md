@@ -14,9 +14,20 @@ TL;DR - Ensure organisational oversight exists for all technology usage, and pro
 - Ownership model. Include technical staff, developers, sysadmins, procurement responsibilities.
 
 ## Guidance
-TODO: target below at owners of various responsibilities. Small orgs will have to be across all areas where larger orgs can divide responsibilities between teams.
-- Developers - [Code Management](Documents/CodeManagement.md)
-- Sysadmins - [Security Uplift](Documents/SecurityUplift.md)
+In a small organisation a single team will hav
+TODO: target below at owners of various responsibilities. Small orgs will have to be across all areas where larger orgs can divide responsibilities between teams. Below guidance is in order of usefulness/implementation (i.e. first item will have biggest ROI and lowest effort to implement)
+
+### For Developers
+Developers resource allocation should be led by Enterprise IT
+1. [Code Management](Documents/CodeManagement.md)
+
+### For Infrastructure Operations
+Infrastructure Operations focus should be streamlining developer workflows and securely integrating with external SaaS systems
+1. [Security Uplift](Documents/SecurityUplift.md)
+
+### For Enterprise IT (Portfolio & Project Management)
+Enterprise IT should guide the organisation into optimal investments to either adjust business processes to match existing commercial offerings, or clearly define unique organisational problems for internal/external developers to build, customise and maintain solutions for.
+1. Enterprise Architecture
 
 ### [Azure Security Fundamentals - Shared Responsibility](https://docs.microsoft.com/en-us/azure/security/fundamentals/shared-responsibility)
 Define at a high level what your central team has skills in and what can be outsourced (most likely to a public cloud provider or SaaS provider).
