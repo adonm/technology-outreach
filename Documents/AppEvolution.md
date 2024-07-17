@@ -46,9 +46,7 @@ graph LR
 
 ## Enhanced Security and Control
 
-Centralized vulnerability management to address current weaknesses across all platforms
-
-Implement phishing resistant multifactor authentication across the sector
+Centralized vulnerability management enables targeting current weaknesses across all platforms and implementing evolving controls such as zero trust architectures and phishing resistant multifactor authentication at scale.
 
 Improve security visibility and response capabilities
 
@@ -60,47 +58,38 @@ Improve security visibility and response capabilities
     - Maintain control over architectural decisions and intellectual property
     - Reduce dependency on external vendors for core competencies
 
-## Sector wide Vulnerability Management:
+## Sector wide Vulnerability Management
 
-Implement sector-wide vulnerability assessment and remediation processes
+- Implement sector-wide vulnerability assessment and remediation processes
+- Establish a operational security capability for proactive threat detection
+- Regular security audits and penetration testing managed internally
 
-Establish a operational security capability for proactive threat detection
+## Unified Identity and Access Management
 
-Regular security audits and penetration testing managed internally
+- Standardize and strengthen multifactor authentication across all services
+- Implement risk-based authentication for sensitive systems
+- Centralized user lifecycle management and access control
 
-## Unified Identity and Access Management:
+## Cost-Effectiveness
 
-Standardize and strengthen multifactor authentication across all services
-
-Implement risk-based authentication for sensitive systems
-
-Centralized user lifecycle management and access control
-
-## Cost-Effectiveness:
-
-Initial investment offset by reduced long-term vendor costs and security risk reduction
-
-More efficient resource allocation for security and operations
-
-Increasing efficiency over time
+- Initial investment offset by reduced long-term vendor costs and security risk reduction
+- More efficient resource allocation for security and operations
+- Increasing efficiency over time
 
 ## Agility and solution targeting:
 
-Faster response to emerging security threats and changing needs
+- Faster response to emerging security threats and changing needs
+- Ability to implement tailored security solutions specific to organisations risk and exposure profile
 
-Ability to implement tailored security solutions specific to organisations risk and exposure profile
+## Workforce Development
 
-## Workforce Development:
+- Create high-value interrnal roles and teams
+- Develop a culture of security awareness and continuous improvement
 
-Create high-value interrnal roles and teams
+## Strategic Alignment
 
-Develop a culture of security awareness and continuous improvement
-
-## Strategic Alignment:
-
-Ensure security initiatives closely align with org priorities
-
-Maintain direct accountability for cybersecurity across the sector
+- Ensure security initiatives closely align with org priorities
+- Maintain direct accountability for cybersecurity across the sector
 
 ## Recommendation
 
