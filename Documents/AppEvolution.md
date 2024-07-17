@@ -76,7 +76,7 @@ Improve security visibility and response capabilities
 - More efficient resource allocation for security and operations
 - Increasing efficiency over time
 
-## Agility and solution targeting:
+## Agility and solution targeting
 
 - Faster response to emerging security threats and changing needs
 - Ability to implement tailored security solutions specific to organisations risk and exposure profile
