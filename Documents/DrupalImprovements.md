@@ -17,7 +17,7 @@ graph TD
     
     E[User] -->|Searches| D
     D -->|Returns results| E
-    E -->|Clicks on result| F{Custom Module Check}
+    E -->|Clicks on result| F[Public users redirected<br>Internal/search users can view/crawl]
     F -->|Admin user| G[View Node on Drupal Site]
     F -->|Regular user| H[Redirect to External URL]
     
