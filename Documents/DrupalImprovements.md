@@ -1,172 +1,123 @@
-# Implementing External Link Indexing in Drupal
+# Using SQLMesh and Drupal Migrate for external content ingestion
 
-This guide will walk you through creating a custom Drupal module that allows you to index content from external sites while redirecting users to the original source when they attempt to view the content directly.
+This guide outlines a process to ingest external content into Drupal using SQLMesh with Python models for data transformation and the Drupal Migrate API for data ingestion.
 
 ## Overview
 
-1. Create a custom content type
-2. Create a custom module
-3. Configure Drupal search
-4. (Optional) Integrate with Feeds module
-
 ```mermaid
 graph TD
-    A[External Website] -->|Feeds module fetches data| B(Feeds Import Process)
-    B -->|Creates/Updates| C[External Link Page Nodes]
-    C -->|Indexed by| D[Drupal Search]
+    A[External Sources] -->|Raw data| B[SQLMesh]
+    B -->|Transform data| C[Staging Database]
+    C -->|Source for migration| D[Drupal Migrate API]
+    D -->|Creates/Updates| E[Content Entities]
+    E -->|Indexed by| F[Drupal Search]
     
-    E[User] -->|Searches| D
-    D -->|Returns results| E
-    E -->|Clicks on result| F[Public users redirected<br>Internal/search users can view/crawl]
-    F -->|Admin user| G[View Node on Drupal Site]
-    F -->|Regular user| H[Redirect to External URL]
-    
-    I[Content Editor] -->|Creates/Edits| C
-    
-    subgraph Drupal Site
+    subgraph Data Pipeline
+    A
     B
     C
+    end
+    
+    subgraph Drupal Site
     D
+    E
     F
-    G
     end
 ```
 
-This diagram illustrates the flow:
+## Steps
 
-1. The process starts with an external website, which is the source of content.
+1. **Set up SQLMesh**
+   - Install: `pip install sqlmesh`
+   - Initialize project: `sqlmesh init my_project`
 
-2. The Feeds module fetches data from the external website and processes it.
+2. **Create Python SQLMesh Models**
+   - Example `models/external_content.py`:
 
-3. The Feeds import process creates or updates "External Link Page" nodes in Drupal.
+     ```python
+     from sqlmesh import model, Column, field
 
-4. These nodes are indexed by Drupal's search system.
+     @model
+     class ExternalContent:
+         id: int = field(primary_key=True)
+         title: str
+         body: str
+         external_url: str
+         published_at: Column('timestamp')
+         content_type: str
 
-5. When a user searches on the Drupal site, they get results that include these indexed external pages.
+         @classmethod
+         def transform(cls):
+             return f"""
+                 SELECT
+                     id,
+                     title,
+                     body,
+                     url AS external_url,
+                     published_at,
+                     type AS content_type
+                 FROM raw_external_data
+                 WHERE published_at > '2023-01-01'
+             """
+     ```
 
-6. If a user clicks on a search result, the custom module checks the user's role:
-   - If it's an admin user, they view the node on the Drupal site
-   - If it's a regular user, they're redirected to the external URL
+3. **Run SQLMesh**
+   - Execute: `sqlmesh run`
 
-7. Content editors could also directly create or edit these "External Link Page" nodes within Drupal.
+4. **Configure Drupal Migration**
+   - Install modules: `composer require drupal/migrate_plus drupal/migrate_tools`
+   - Create `config/install/migrate_plus.migration.external_content.yml`:
 
-This diagram is a mockup of how the Feeds module, custom module, and Drupal's core features could work together to create a system that indexes external content while maintaining original source links for end-users.
+     ```yaml
+     id: external_content
+     source:
+       plugin: sql
+       query: SELECT * FROM external_content
+     process:
+       type: content_type
+       title: title
+       body/value: body
+       field_external_url: external_url
+       created: 
+         plugin: format_date
+         from_format: 'Y-m-d H:i:s'
+         to_format: 'U'
+         source: published_at
+     destination:
+       plugin: entity:node
+     ```
 
-## Step 1: Create a Custom Content Type
+5. **Run Migration**
+   - Execute: `drush migrate:import external_content`
 
-1. Go to Structure > Content types > Add content type
-2. Name it "External Link Page"
-3. Add a "Body" field for the content to be indexed
-4. Add a "Link" field (URL type) for the external URL, name it "field_external_url"
+6. **Implement Custom Module for Redirection (Optional)**
+   - Create `modules/custom/external_content_redirect/external_content_redirect.module`:
 
-## Step 2: Create a Custom Module
+     ```php
+     <?php
+     use Drupal\Core\Entity\EntityInterface;
+     use Symfony\Component\HttpFoundation\RedirectResponse;
 
-1. In your Drupal installation's `modules/custom` directory, create a new folder named `simple_external_link`
-2. Inside this folder, create three files:
+     function external_content_redirect_entity_view(array &$build, EntityInterface $entity, $view_mode, $langcode) {
+       if ($entity->getEntityTypeId() == 'node' 
+           && !empty($entity->field_external_url)
+           && $view_mode == 'full'
+           && !\Drupal::currentUser()->hasPermission('administer nodes')) {
+         $external_url = $entity->field_external_url->uri;
+         if (!empty($external_url)) {
+           $response = new RedirectResponse($external_url);
+           $response->send();
+           exit;
+         }
+       }
+     }
+     ```
 
-### simple_external_link.info.yml
-
-```yaml
-name: Simple External Link
-type: module
-description: 'Redirects to external URL for a specific content type.'
-core_version_requirement: ^9 || ^10
-package: Custom
-```
-
-### simple_external_link.libraries.yml
-
-```yaml
-# This file is currently empty as we don't have any CSS or JS to add.
-# You can add libraries here if needed in the future.
-```
-
-### simple_external_link.module
-
-```php
-<?php
-
-/**
- * @file
- * Contains simple_external_link.module.
- */
-
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Url;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-
-/**
- * Implements hook_entity_view().
- */
-function simple_external_link_entity_view(array &$build, EntityInterface $entity, $view_mode, $langcode) {
-  if ($entity->getEntityTypeId() == 'node' 
-      && $entity->bundle() == 'external_link_page' 
-      && $view_mode == 'full'
-      && !\Drupal::currentUser()->hasPermission('administer nodes')) {
-    $external_url = $entity->get('field_external_url')->uri;
-    if (!empty($external_url)) {
-      $response = new RedirectResponse($external_url);
-      $response->send();
-      exit;
-    }
-  }
-}
-
-/**
- * Implements hook_help().
- */
-function simple_external_link_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    case 'help.page.simple_external_link':
-      $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Simple External Link module provides functionality to redirect users to an external URL when viewing specific content types.') . '</p>';
-      return $output;
-  }
-}
-```
-
-3. Enable the module through the Drupal admin interface (Extend) or using Drush:
-   ```
-   drush en simple_external_link
-   ```
-
-## Step 3: Configure Drupal Search
-
-1. Go to Configuration > Search and metadata > Search pages
-2. Edit the content search page
-3. Ensure that your new "External Link Page" content type is included in the indexed content types
-
-## Step 4: (Optional) Integrate with Feeds Module
-
-To automatically import content from external sources:
-
-1. Install the Feeds module:
-   ```
-   composer require drupal/feeds
-   drush en feeds
-   ```
-
-2. Go to Structure > Feed types > Add feed type
-3. Name it "External Site Feed"
-4. Configure the fetcher, parser, and processor as appropriate for your data source
-5. In the "Mapping" section, map incoming data to your "External Link Page" fields:
-   - Title → Title
-   - Description or Content → Body
-   - Link → field_external_url
-
-6. Go to Content > Feeds > Add feed
-7. Choose your "External Site Feed" type
-8. Enter the URL of your external data source
-9. Run the import
-
-## How It Works
-
-- The custom module redirects non-admin users to the external URL when they try to view an "External Link Page" node directly.
-- Admin users can view and edit these nodes normally.
-- The node's content is indexed by Drupal's search, making it searchable on your site.
-- When using Feeds, you can periodically import and update content from external sources.
+7. **Configure Drupal Search**
+   - Ensure new content types are included in search indexing
 
 ## Notes
 
-- This setup assumes your content type is named "external_link_page" and the URL field is "field_external_url". Modify the module code if you use different names.
+- Adjust the SQLMesh model and Drupal migration configuration to match your specific data structure.
+- Schedule the SQLMesh and migration processes to run periodically for up-to-date content.
+- Customize the redirection module based on your content structure and requirements.
